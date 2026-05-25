@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geny, Genomy, Kwasy Nukleinowe — Notatki</title>
+  <style>
+    :root {
+      --green: #00FF00;
+      --green-dim: #00cc00;
+      --green-faint: #004400;
+      --green-mid: #00aa00;
+      --bg: #0a0a0a;
+      --border: #003300;
+      --yellow: #ffff00;
+      --cyan: #00ffff;
+      --orange: #ff9900;
+      --red: #ff4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--green);
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 40px 20px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* scanline overlay */
+    body::before {
+      content: "";
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.08) 3px,
+        rgba(0,0,0,0.08) 4px
+      );
+      z-index: 9999;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      text-align: center;
+      padding: 40px 20px 50px;
+      border-bottom: 2px solid var(--green-faint);
+      margin-bottom: 60px;
+    }
+    .site-header .label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--green-mid);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .site-header h1 {
+      font-size: clamp(22px, 4vw, 36px);
+      color: var(--green);
+      text-shadow: 0 0 18px #00ff0088, 0 0 40px #00ff0033;
+      letter-spacing: 2px;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+    .site-header .subtitle {
+      color: var(--green-mid);
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1.1em;
+      background: var(--green);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      margin-left: 3px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── SECTION BADGES ── */
+    .section-badge {
+      display: inline-block;
+      padding: 3px 14px;
+      border: 1px solid;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      border-radius: 2px;
+      margin-bottom: 10px;
+    }
+    .badge-1 { border-color: var(--green); color: var(--green); }
+    .badge-2 { border-color: var(--cyan); color: var(--cyan); }
+    .badge-3 { border-color: var(--orange); color: var(--orange); }
+
+    /* ── SECTIONS ── */
+    section {
+      margin-bottom: 80px;
+    }
+    section > h2 {
+      font-size: clamp(18px, 3vw, 26px);
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--green-faint);
+    }
+    .sec-1 > h2 { color: var(--green); text-shadow: 0 0 10px #00ff0066; }
+    .sec-2 > h2 { color: var(--cyan);  text-shadow: 0 0 10px #00ffff66; }
+    .sec-3 > h2 { color: var(--orange);text-shadow: 0 0 10px #ff990066; }
+
+    /* ── TOPIC CARDS ── */
+    .card {
+      border: 1px solid var(--green-faint);
+      border-left-width: 3px;
+      padding: 22px 26px;
+      margin-bottom: 28px;
+      background: #050f05;
+      border-radius: 2px;
+    }
+    .sec-1 .card { border-left-color: var(--green-dim); }
+    .sec-2 .card { border-left-color: var(--cyan); }
+    .sec-3 .card { border-left-color: var(--orange); }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+    }
+    .sec-1 .card h3 { color: #66ff66; }
+    .sec-2 .card h3 { color: #66ffff; }
+    .sec-3 .card h3 { color: #ffcc66; }
+
+    .card p { color: #b8f0b8; margin-bottom: 10px; }
+    .card p:last-child { margin-bottom: 0; }
+
+    .card ul, .card ol {
+      padding-left: 22px;
+      color: #b8f0b8;
+    }
+    .card ul li, .card ol li { margin-bottom: 6px; }
+
+    /* ── ASCII BOXES ── */
+    .ascii-box {
+      background: #000;
+      border: 1px solid var(--green-faint);
+      padding: 20px 24px;
+      margin: 18px 0;
+      overflow-x: auto;
+      border-radius: 2px;
+    }
+    .ascii-box pre {
+      color: var(--green);
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre;
+    }
+    .sec-2 .ascii-box pre { color: var(--cyan); }
+    .sec-3 .ascii-box pre { color: var(--orange); }
+
+    /* ── HIGHLIGHT SPANS ── */
+    .hl-g  { color: var(--green);  font-weight: bold; }
+    .hl-y  { color: var(--yellow); font-weight: bold; }
+    .hl-c  { color: var(--cyan);   font-weight: bold; }
+    .hl-o  { color: var(--orange); font-weight: bold; }
+    .hl-r  { color: var(--red);    font-weight: bold; }
+
+    /* ── TABLE ── */
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .comp-table th {
+      background: #001a00;
+      color: var(--green);
+      padding: 10px 14px;
+      border: 1px solid var(--green-faint);
+      text-align: left;
+      letter-spacing: 1px;
+    }
+    .comp-table td {
+      padding: 8px 14px;
+      border: 1px solid var(--green-faint);
+      color: #b8f0b8;
+    }
+    .comp-table tr:nth-child(even) td { background: #050f05; }
+    .comp-table .yes { color: var(--green); }
+    .comp-table .no  { color: var(--red); }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      align-items: center;
+      margin: 18px 0;
+    }
+    .flow-step {
+      background: #001a00;
+      border: 1px solid var(--green-dim);
+      padding: 10px 18px;
+      border-radius: 3px;
+      font-size: 13px;
+      color: var(--green);
+      text-align: center;
+      min-width: 100px;
+    }
+    .flow-arrow {
+      color: var(--green-dim);
+      font-size: 20px;
+      padding: 0 8px;
+    }
+
+    /* ── SUMMARY BOX ── */
+    .summary {
+      border: 2px solid var(--green);
+      background: #001500;
+      padding: 30px 34px;
+      margin-top: 60px;
+      border-radius: 3px;
+      box-shadow: 0 0 30px #00ff0022;
+    }
+    .summary h2 {
+      color: var(--yellow);
+      font-size: 20px;
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+      text-shadow: 0 0 10px #ffff0066;
+    }
+    .summary .checklist { list-style: none; padding: 0; }
+    .summary .checklist li {
+      color: #ccffcc;
+      padding: 5px 0;
+      border-bottom: 1px solid #002200;
+      font-size: 14px;
+    }
+    .summary .checklist li::before { content: "[ ] "; color: var(--green-dim); }
+
+    /* ── SEPARATOR ── */
+    .sep {
+      border: none;
+      border-top: 1px dashed var(--green-faint);
+      margin: 36px 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      color: var(--green-faint);
+      font-size: 12px;
+      padding-top: 40px;
+      border-top: 1px solid var(--green-faint);
+      letter-spacing: 1px;
+    }
+    footer span { color: var(--green-mid); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="label">// biologia — szkoła średnia //</div>
+  <h1>GENY · GENOMY · KWASY NUKLEINOWE<span class="cursor"></span></h1>
+  <div class="subtitle">
+    Kompletne notatki &nbsp;|&nbsp; Podstawa + Rozszerzenie + Ciekawostki
+  </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════════
+     SEKCJA 1 — PODSTAWA
+════════════════════════════════════════════ -->
+<section class="sec-1">
+  <span class="section-badge badge-1">[ SEKCJA 1 ]</span>
+  <h2>★ PODSTAWA — MUST KNOW</h2>
+
+  <!-- 1.1 Kwasy nukleinowe -->
+  <div class="card">
+    <h3>1.1 / Czym są kwasy nukleinowe?</h3>
+    <p>
+      Kwasy nukleinowe to <span class="hl-g">wielkocząsteczkowe polimery</span> zbudowane z mniejszych jednostek
+      zwanych <span class="hl-y">nukleotydami</span>. Są nośnikami i realizatorami informacji genetycznej.
+    </p>
+    <p>Wyróżniamy dwa rodzaje:</p>
+    <ul>
+      <li><span class="hl-g">DNA</span> — kwas dezoksyrybonukleinowy &nbsp;→&nbsp; przechowuje informację genetyczną</li>
+      <li><span class="hl-c">RNA</span> — kwas rybonukleinowy &nbsp;→&nbsp; przenosi i realizuje informację genetyczną</li>
+    </ul>
+  </div>
+
+  <!-- 1.2 Budowa nukleotydu -->
+  <div class="card">
+    <h3>1.2 / Budowa nukleotydu</h3>
+    <p>Każdy nukleotyd składa się z <span class="hl-y">trzech elementów</span>:</p>
+    <ul>
+      <li><span class="hl-g">Zasada azotowa</span> — niesie informację, różni się między nukleotydami</li>
+      <li><span class="hl-g">Cukier (pentozа)</span> — deoksyryboza (w DNA) lub ryboza (w RNA)</li>
+      <li><span class="hl-g">Reszta fosforanowa</span> — łączy nukleotydy w łańcuch</li>
+    </ul>
+    <div class="ascii-box">
+<pre>
+  ┌─────────────────────┐
+  │   ZASADA AZOTOWA    │
+  │  (A, T/U, G, C)     │
+  └──────────┬──────────┘
+             │
+  ┌──────────▼──────────┐
+  │    CUKIER (pentoza) │
+  │  deoksyryboza / ryb │
+  └──────────┬──────────┘
+             │
+  ┌──────────▼──────────┐
+  │  RESZTA FOSFORANOWA │
+  │       –PO₄³⁻        │
+  └─────────────────────┘
+</pre>
+    </div>
+  </div>
+
+  <!-- 1.3 Zasady azotowe -->
+  <div class="card">
+    <h3>1.3 / Zasady azotowe i parowanie</h3>
+    <p>
+      Zasady azotowe dzielimy na dwie grupy:
+    </p>
+    <ul>
+      <li><span class="hl-y">Puryny</span> (podwójny pierścień): <span class="hl-g">Adenina (A)</span>, <span class="hl-g">Guanina (G)</span></li>
+      <li><span class="hl-y">Pirymidyny</span> (pojedynczy pierścień): <span class="hl-g">Cytozyna (C)</span>, <span class="hl-g">Tymina (T)</span> — tylko w DNA,
+          <span class="hl-c">Uracyl (U)</span> — tylko w RNA</li>
+    </ul>
+    <hr class="sep">
+    <p><span class="hl-g">Reguła Chargaffa</span> — zasady parują się zawsze w ten sam sposób (wiązania wodorowe):</p>
+    <div class="ascii-box">
+<pre>
+  DNA:        A ═══ T     (2 wiązania wodorowe)
+              G ≡≡≡ C     (3 wiązania wodorowe)
+
+  DNA → RNA:  A ═══ U     (w transkrypcji)
+              G ≡≡≡ C
+</pre>
+    </div>
+    <p>
+      Zasada: <span class="hl-y">puryna zawsze łączy się z pirymidyną</span>.
+      Dlatego podwójna helisa DNA ma stałą szerokość.
+    </p>
+  </div>
+
+  <!-- 1.4 DNA vs RNA -->
+  <div class="card">
+    <h3>1.4 / DNA vs RNA — porównanie</h3>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Cecha</th>
+          <th>DNA</th>
+          <th>RNA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Liczba nici</td><td class="yes">2 (podwójna helisa)</td><td class="no">1 (jednoniciowy)</td></tr>
+        <tr><td>Cukier</td><td class="yes">Deoksyryboza</td><td class="no">Ryboza</td></tr>
+        <tr><td>Zasada specyficzna</td><td class="yes">Tymina (T)</td><td class="no">Uracyl (U)</td></tr>
+        <tr><td>Trwałość</td><td class="yes">Bardzo trwałe</td><td class="no">Nietrwałe</td></tr>
+        <tr><td>Lokalizacja (główna)</td><td class="yes">Jądro komórkowe</td><td class="no">Cytoplazma, jądro</td></tr>
+        <tr><td>Funkcja</td><td class="yes">Przechowuje info</td><td class="no">Przenosi / realizuje info</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 1.5 Gen -->
+  <div class="card">
+    <h3>1.5 / Czym jest gen?</h3>
+    <p>
+      <span class="hl-g">Gen</span> to odcinek DNA (sekwencja nukleotydów), który zawiera informację
+      o budowie jednego białka (lub RNA funkcjonalnego).
+    </p>
+    <p>Gen ma swoje stałe miejsce na chromosomie — zwane <span class="hl-y">locus</span>.</p>
+    <p>Różne wersje tego samego genu to <span class="hl-y">allele</span>.</p>
+  </div>
+
+  <!-- 1.6 Genom -->
+  <div class="card">
+    <h3>1.6 / Czym jest genom?</h3>
+    <p>
+      <span class="hl-g">Genom</span> to <span class="hl-y">kompletny zestaw informacji genetycznej</span>
+      organizmu — czyli wszystkie geny i wszystkie sekwencje DNA w jednym haploidalnym zestawie chromosomów.
+    </p>
+    <ul>
+      <li>Człowiek: ~3 miliardy par zasad, ~20 000–25 000 genów</li>
+      <li>Jedynie ok. <span class="hl-y">2% genomu ludzkiego</span> to geny kodujące białka</li>
+      <li>Reszta: sekwencje regulatorowe, introny, transposony, „ciemna materia" genomu</li>
+    </ul>
+  </div>
+
+  <!-- 1.7 Przepływ informacji -->
+  <div class="card">
+    <h3>1.7 / Przepływ informacji genetycznej (Dogmat Centralny Biologii)</h3>
+    <p>
+      Francis Crick sformułował w 1958 r. zasadę, że informacja genetyczna przepływa w jednym kierunku:
+    </p>
+    <div class="flow">
+      <div class="flow-step">DNA</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">RNA</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">BIAŁKO</div>
+    </div>
+    <ul>
+      <li><span class="hl-g">Replikacja</span>: DNA → DNA (kopiowanie przed podziałem komórki)</li>
+      <li><span class="hl-g">Transkrypcja</span>: DNA → mRNA (odczytanie genu)</li>
+      <li><span class="hl-g">Translacja</span>: mRNA → białko (synteza białka na rybosomie)</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     SEKCJA 2 — ROZSZERZENIE
+════════════════════════════════════════════ -->
+<section class="sec-2">
+  <span class="section-badge badge-2">[ SEKCJA 2 ]</span>
+  <h2>◈ ROZSZERZENIE — GŁĘBSZE POJĘCIA</h2>
+
+  <!-- 2.1 Struktura DNA -->
+  <div class="card">
+    <h3>2.1 / Struktura podwójnej helisy DNA</h3>
+    <p>
+      Model podwójnej helisy DNA opracowali <span class="hl-c">Watson i Crick</span> w 1953 r.
+      (na podstawie zdjęcia rentgenowskiego Rosalind Franklin).
+    </p>
+    <div class="ascii-box">
+<pre>
+  5'─────────────────3'
+    A─T  G─C  C─G
+   /│\ /│\ /│\
+  S─P─S─P─S─P─S     S = cukier (deoksyryboza)
+   \│/ \│/ \│/      P = fosforan
+    T─A  C─G  G─C   │ = wiązanie wodorowe
+  3'─────────────────5'
+
+  Nici są: ANTYRÓWNOLEGŁE (5'→3' i 3'→5')
+           KOMPLEMENTARNE (A-T, G-C)
+</pre>
+    </div>
+    <ul>
+      <li>Szkielet (zewnętrzny): <span class="hl-c">cukier + fosforan</span> (hydrofil)</li>
+      <li>Wnętrze helisy: <span class="hl-c">pary zasad</span> (hydrofob, układają się jak stopnie schodów)</li>
+      <li>Skok helisy: ~3,4 nm / 10 par zasad</li>
+    </ul>
+  </div>
+
+  <!-- 2.2 Rodzaje RNA -->
+  <div class="card">
+    <h3>2.2 / Rodzaje RNA i ich funkcje</h3>
+    <ul>
+      <li>
+        <span class="hl-c">mRNA</span> (matrycowy / messenger) — przenosi informację z jądra do rybosomu.
+        Zawiera kodony (trójki zasad).
+      </li>
+      <li>
+        <span class="hl-c">tRNA</span> (transportujący) — przynosi aminokwasy do rybosomu.
+        Ma antykodon komplementarny do kodonu mRNA. Charakterystyczna struktura „koniczynki".
+      </li>
+      <li>
+        <span class="hl-c">rRNA</span> (rybosomowy) — wchodzi w skład rybosomów, katalizuje tworzenie wiązań
+        peptydowych (rybozymy).
+      </li>
+      <li>
+        <span class="hl-c">miRNA / siRNA</span> — małe RNA regulatorowe; wyciszają ekspresję genów.
+      </li>
+    </ul>
+  </div>
+
+  <!-- 2.3 Transkrypcja i translacja szczegółowo -->
+  <div class="card">
+    <h3>2.3 / Transkrypcja — krok po kroku</h3>
+    <ol>
+      <li><span class="hl-c">Inicjacja</span>: polimeraza RNA przyłącza się do promotora (sekwencji TATA box u eukariontów)</li>
+      <li><span class="hl-c">Elongacja</span>: nić matrycowa DNA odczytywana 3'→5', nić mRNA syntetyzowana 5'→3'</li>
+      <li><span class="hl-c">Terminacja</span>: polimeraza dociera do sekwencji terminatorowej i odpada</li>
+    </ol>
+    <p>U eukariontów: pre-mRNA jest modyfikowany — usuwane są <span class="hl-y">introny</span>, łączone są <span class="hl-y">eksony</span> (splicing).</p>
+    <div class="ascii-box">
+<pre>
+  pre-mRNA:  [5'UTR] EKSON─INTRON─EKSON─INTRON─EKSON [3'UTR]
+                       ↓   usuń introny (spliceosom)
+  dojrzały
+  mRNA:      [5'cap] EKSON──────────────EKSON [polyA]
+</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2.4 / Translacja — kod genetyczny</h3>
+    <p>
+      Kod genetyczny to zestaw reguł, według których sekwencja zasad w mRNA jest tłumaczona na
+      sekwencję aminokwasów.
+    </p>
+    <ul>
+      <li><span class="hl-c">Kodon</span> = trójka zasad mRNA → 1 aminokwas</li>
+      <li>Kod jest <span class="hl-y">trójkowy, bezprzecinkowy, niezachodzący, zdegenerowany i uniwersalny</span></li>
+      <li>64 kodony → 20 aminokwasów + 3 kodony stop (UAA, UAG, UGA)</li>
+      <li>Kodon startowy: <span class="hl-c">AUG</span> (metionina)</li>
+    </ul>
+    <div class="ascii-box">
+<pre>
+  mRNA: 5'─ AUG ─ UUU ─ GGC ─ AAA ─ UAA ─3'
+               ↓       ↓       ↓       ↓
+              Met     Phe     Gly     Lys   STOP
+
+  tRNA niesie aminokwas + posiada antykodon:
+       kodon mRNA:   A─U─G
+                     │ │ │
+   antykodon tRNA:   U─A─C
+</pre>
+    </div>
+  </div>
+
+  <!-- 2.5 Mutacje -->
+  <div class="card">
+    <h3>2.5 / Mutacje — podstawy</h3>
+    <p>
+      <span class="hl-c">Mutacja</span> to trwała, dziedziczna zmiana w sekwencji DNA.
+    </p>
+    <p><span class="hl-y">Mutacje genowe (punktowe):</span></p>
+    <ul>
+      <li><span class="hl-c">Substytucja</span> — zamiana jednej zasady na inną
+        <ul>
+          <li>Synonimiczna (cicha) — zmiana kodonu, ale aminokwas się nie zmienia</li>
+          <li>Zmiany sensu — zmienia aminokwas (np. anemia sierpowata: Glu→Val)</li>
+          <li>Nonsensowna — pojawia się kodon stop → skrócone białko</li>
+        </ul>
+      </li>
+      <li><span class="hl-c">Insercja / delecja</span> — wstawienie lub usunięcie zasady → przesunięcie ramki odczytu</li>
+    </ul>
+    <p><span class="hl-y">Mutacje chromosomowe:</span> delecje, duplikacje, inwersje, translokacje całych fragmentów chromosomów.</p>
+    <p><span class="hl-y">Mutacje genomowe:</span> zmiana liczby chromosomów (np. trisomia 21 = Zespół Downa).</p>
+  </div>
+
+  <!-- 2.6 Replikacja -->
+  <div class="card">
+    <h3>2.6 / Replikacja DNA</h3>
+    <p>Replikacja zachodzi metodą <span class="hl-c">semikonserwatywną</span> — każda nowa cząsteczka DNA
+    zawiera 1 starą nić i 1 nowo zsyntetyzowaną.</p>
+    <ul>
+      <li><span class="hl-c">Helikaza</span> — rozplata podwójną helisę</li>
+      <li><span class="hl-c">Prymazа</span> — syntetyzuje primer RNA (krótki start)</li>
+      <li><span class="hl-c">Polimeraza DNA</span> — syntetyzuje nową nić <em>zawsze</em> w kierunku 5'→3'</li>
+      <li><span class="hl-c">Ligaza</span> — łączy fragmenty Okazaki na nici opóźnionej</li>
+    </ul>
+    <div class="ascii-box">
+<pre>
+  Nić wiodąca  →→→→→→→→→→ (syntetyzowana ciągle)
+               ┌──────────────────────────────
+  matryca  ════╪══════════════════════════════
+  matryca  ════╪══════════════════════════════
+               └──────────────────────────────
+  Nić opóźniona ←─── ←─── ←─── (fragmenty Okazaki)
+</pre>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     SEKCJA 3 — CIEKAWOSTKI
+════════════════════════════════════════════ -->
+<section class="sec-3">
+  <span class="section-badge badge-3">[ SEKCJA 3 ]</span>
+  <h2>⚡ DODATKOWE INFO / CIEKAWOSTKI</h2>
+
+  <div class="card">
+    <h3>3.1 / Gdybyś wyprostował DNA z jednej komórki...</h3>
+    <p>
+      Każda ludzka komórka zawiera ~2 metry DNA, upakowanego w jądrze o średnicy ~6 mikrometrów.
+      Gdybyś wyprostował całe DNA z ciała człowieka — otrzymałbyś nić długości
+      <span class="hl-o">ok. 100 miliardów km</span> (670 razy odległość Ziemia–Słońce!).
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>3.2 / Projekt Poznania Genomu Ludzkiego (HGP)</h3>
+    <p>
+      Sekwencjonowanie całego ludzkiego genomu trwało 13 lat (1990–2003) i kosztowało
+      <span class="hl-o">~3 miliardy dolarów</span>. Dziś sekwencjonowanie genomu jednej osoby
+      kosztuje mniej niż 500 USD i zajmuje 1–2 dni.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>3.3 / Epigenetyka — geny ≠ przeznaczenie</h3>
+    <p>
+      Ekspresja genów jest regulowana przez modyfikacje epigenetyczne — zmiany, które
+      <span class="hl-o">nie zmieniają sekwencji DNA</span>, ale włączają / wyłączają geny:
+    </p>
+    <ul>
+      <li><span class="hl-o">Metylacja DNA</span> — dodanie grupy –CH₃ do cytozyny → wyciszenie genu</li>
+      <li><span class="hl-o">Modyfikacje histonów</span> — acetylacja, fosforylacja → zmiana upakowania DNA</li>
+    </ul>
+    <p>Środowisko, dieta, stres mogą zmieniać epigenom — i te zmiany mogą być dziedziczone!</p>
+  </div>
+
+  <div class="card">
+    <h3>3.4 / CRISPR-Cas9 — nożyczki do DNA</h3>
+    <p>
+      CRISPR-Cas9 to system edycji genów odkryty ok. 2012 r. (Jennifer Doudna, Emmanuelle Charpentier
+      — Nagroda Nobla 2020). Pozwala na precyzyjne <span class="hl-o">wycinanie i wklejanie fragmentów DNA</span>
+      w dowolnym organizmie.
+    </p>
+    <p>Zastosowania: leczenie chorób genetycznych, terapie nowotworowe, modyfikacja roślin.</p>
+  </div>
+
+  <div class="card">
+    <h3>3.5 / Odwrotna transkryptaza — wyjątek od dogmatu</h3>
+    <p>
+      Retrowirusy (np. HIV) posiadają enzym <span class="hl-o">odwrotną transkryptazę</span>, który
+      przepisuje informację w kierunku odwrotnym: <strong>RNA → DNA</strong>.
+      To wyjątek od klasycznego dogmatu centralnego.
+    </p>
+    <div class="ascii-box">
+<pre>
+  Klasyczny dogmat:    DNA ──→ RNA ──→ Białko
+  Retrowirusy (HIV):   RNA ──→ DNA ──→ RNA ──→ Białko
+                            ↑
+                       odwrotna transkryptaza
+</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3.6 / Telomery — biologiczny zegar komórki</h3>
+    <p>
+      <span class="hl-o">Telomery</span> to powtarzające się sekwencje DNA (TTAGGG) na końcach chromosomów.
+      Przy każdym podziale komórki skracają się — jest to jeden z mechanizmów starzenia się.
+    </p>
+    <p>
+      Telomeraza (enzym aktywny m.in. w komórkach nowotworowych) potrafi odbudowywać telomery,
+      nadając komórkom zdolność do „nieśmiertelności".
+    </p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PODSUMOWANIE DO NAUKI
+════════════════════════════════════════════ -->
+<div class="summary">
+  <h2>[ DO NAUKI ] — CHECKLISTA</h2>
+  <p style="color:#88cc88; margin-bottom:20px; font-size:13px;">Sprawdź, czy umiesz powiedzieć każdy punkt własnymi słowami:</p>
+  <ul class="checklist">
+    <li>Kwasy nukleinowe to polimery nukleotydów — wiem co to nukleotyd (zasada + cukier + fosforan)</li>
+    <li>DNA: 2 nici, deoksyryboza, zasady A/T/G/C — spirala antyrównoległa</li>
+    <li>RNA: 1 nić, ryboza, zasady A/U/G/C — kilka rodzajów (mRNA, tRNA, rRNA)</li>
+    <li>Parowanie zasad: A=T (2H), G≡C (3H) w DNA; A=U w RNA</li>
+    <li>Gen = odcinek DNA kodujący jedno białko (lub RNA); locus = miejsce na chromosomie</li>
+    <li>Genom = cały materiał genetyczny organizmu (haploidalny zestaw)</li>
+    <li>Dogmat centralny: DNA → (transkrypcja) → mRNA → (translacja) → białko</li>
+    <li>Replikacja: semikonserwatywna, polimeraza DNA, kierunek 5'→3'</li>
+    <li>Mutacje: substytucja, insercja, delecja — skutki dla białka</li>
+    <li>Kod genetyczny: trójkowy, zdegenerowany, uniwersalny; kodon start AUG, 3 kodony stop</li>
+  </ul>
+</div>
+
+
+<footer>
+  <p>Materiał edukacyjny · Biologia SŁO/LO &nbsp;|&nbsp;
+  <span>Poziom podstawowy + rozszerzony</span> &nbsp;|&nbsp;
+  Powodzenia na sprawdzianie! 🟩</p>
+</footer>
+
+</body>
+</html>
